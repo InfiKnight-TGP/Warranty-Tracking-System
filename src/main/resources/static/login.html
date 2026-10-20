@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+<title>Sign in · Warrify</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="auth-brand"><img class="brand-logo" src="images/warrify-mark.svg" alt=""> Warrify</div>
+      <p class="eyebrow">Welcome back</p>
+      <h1>Sign in</h1>
+      <p class="subtitle mb-3">Access your purchases, claims, and warranty coverage.</p>
+      <div class="demo-pills" title="Click to autofill demo credentials">
+        <button type="button" class="demo-pill" onclick="fillDemo('user@vault.com','user123')">👤 Demo User</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('service@vault.com','service123')">🔧 Service Centre</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('admin@vault.com','admin123')">🛡️ Admin</button>
+      </div>
+      <div id="message" class="alert" hidden></div>
+      <form id="login-form">
+        <label class="form-label">Email</label>
+        <input class="form-control mb-3" name="email" type="email" autocomplete="username" required>
+        <label class="form-label">Password</label>
+        <input class="form-control mb-4" name="password" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary w-100">Sign in</button>
+      </form>
+      <p class="auth-footer">New here? <a href="register.html">Create an account</a></p>
+    </section>
+  </main>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function fillDemo(email, password) {
+      const form = document.querySelector('#login-form');
+      form.elements.email.value = email;
+      form.elements.password.value = password;
+    }
+  </script>
+</body>
+</html>

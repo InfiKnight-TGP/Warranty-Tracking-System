@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://vault.com/ws/warranty"
+           xmlns:tns="http://vault.com/ws/warranty"
+           elementFormDefault="qualified">
+    <xs:element name="GetWarrantyStatusRequest">
+        <xs:complexType><xs:sequence><xs:element name="serialNumber" type="xs:string"/></xs:sequence></xs:complexType>
+    </xs:element>
+    <xs:element name="GetWarrantyStatusResponse">
+        <xs:complexType><xs:sequence>
+            <xs:element name="productName" type="xs:string"/>
+            <xs:element name="brand" type="xs:string"/>
+            <xs:element name="purchaseDate" type="xs:string"/>
+            <xs:element name="warrantyExpiry" type="xs:string"/>
+            <xs:element name="daysLeft" type="xs:long"/>
+            <xs:element name="status" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+    </xs:element>
+</xs:schema>

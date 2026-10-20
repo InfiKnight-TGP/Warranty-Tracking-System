@@ -1,0 +1,17 @@
+/target/
+/uploads/
+/.maven-user-home/
+/.mvn-repository/
+/exports/*
+!/exports/.gitkeep
+/warrify-run*.log
+*.log
+.env
+.env.*
+!.env.example
+.classpath
+.project
+.settings/
+.vscode/
+.idea/
+**/all_code.txt

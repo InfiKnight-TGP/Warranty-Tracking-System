@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 48" role="img" aria-labelledby="title">
+  <title id="title">Warrify</title>
+  <defs><linearGradient id="brand" x1="4" y1="4" x2="43" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="#14b8a6"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+  <path d="M24 3 43 10v12c0 12-8 19-19 23C13 41 5 34 5 22V10L24 3Z" fill="url(#brand)"/>
+  <path d="m15 23 6 6 12-13" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <text x="56" y="34" fill="#142b3d" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" font-size="29" font-weight="750" letter-spacing="-1.2">Warrify</text>
+</svg>

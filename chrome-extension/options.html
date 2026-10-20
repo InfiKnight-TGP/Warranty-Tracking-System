@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Warrify Settings</title>
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="options-page">
+  <main class="options-card">
+    <header class="top">
+      <div class="brand"><img class="wordmark" src="icons/warrify-logo.svg" alt="Warrify"><span>Settings</span></div>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Toggle theme"></button>
+    </header>
+    <p class="muted" style="margin:0 0 16px">Configure the address of your local Warrify back end.</p>
+    <div id="status-box" class="notice" hidden></div>
+    <form id="options-form">
+      <div class="field" style="margin-bottom:14px">
+        <label for="serverUrl">Back end server URL</label>
+        <input id="serverUrl" type="url" required placeholder="http://localhost:8080">
+      </div>
+      <div class="row">
+        <button class="button" type="submit">Save settings</button>
+        <button class="button secondary" type="button" id="test-conn">Test connection</button>
+      </div>
+    </form>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

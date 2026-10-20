@@ -2,7 +2,11 @@
 
 A Java 17 and Spring Boot application for tracking purchases, bills, warranties, reminders, and service claims. The web UI is static HTML, CSS, and vanilla JavaScript; REST APIs use JSON, with a SOAP warranty lookup for integration practice.
 
-The product name is **Warrify**. The web app uses its logo and favicon from `src/main/resources/static/images/`; the Chrome extension has matching assets in `chrome-extension/icons/`, including 16, 48, and 128 pixel PNG icons for Chrome.
+The product name is **Warrify**. The web app logo is in `src/main/resources/static/images/warrify-logo.svg`; its favicon is a white **W** on a near-black rounded tile, matching the supplied Warrify wordmark. The Chrome extension uses the same favicon in `chrome-extension/icons/favicon.svg` and matching 16, 48, and 128 pixel toolbar icons. Regenerate the extension PNGs on Windows with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\chrome-extension\icons\generate-icons.ps1
+```
 
 ## Demo prices and currency
 

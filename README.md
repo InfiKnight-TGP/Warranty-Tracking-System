@@ -1,4 +1,4 @@
-# <img src="src/main/resources/static/images/favicon.png" alt="Warrify logo" width="36"> Warrify
+# <img src="src/main/resources/static/images/favicon.svg" alt="Warrify logo" width="36"> Warrify
 
 **Warrify** is a Java 17 / Spring Boot application for storing purchase bills, tracking warranty expiry, sending reminders, and managing service claims. It ships with a static web UI and a Chrome extension that works as a second client of the same API.
 
@@ -252,8 +252,3 @@ If Git reports "dubious ownership" for the folder:
 ```powershell
 git config --global --add safe.directory 'E:/Warranty Tracker'
 ```
-
-## Author
-
-**Dinesh** (23MIC0051), Integrated M.Tech CSE, VIT
-Guide: **Dr. Arun Prasath G**

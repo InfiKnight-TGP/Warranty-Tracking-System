@@ -8,6 +8,22 @@ The product name is **Warrify**. The web app logo is in `src/main/resources/stat
 powershell -NoProfile -ExecutionPolicy Bypass -File .\chrome-extension\icons\generate-icons.ps1
 ```
 
+## Screenshots
+
+Screenshots of the main web pages and Chrome extension are in [`docs/screenshots/`](docs/screenshots/):
+
+| Dashboard | Purchases |
+| --- | --- |
+| ![Warrify dashboard](docs/screenshots/dashboard.png) | ![Warrify purchases](docs/screenshots/purchases.png) |
+
+| Claims | Admin |
+| --- | --- |
+| ![Warrify claims](docs/screenshots/claims.png) | ![Warrify admin](docs/screenshots/admin.png) |
+
+Chrome extension popup:
+
+![Warrify Chrome extension](docs/screenshots/extension.png)
+
 ## Demo prices and currency
 
 Prices are entered and stored as numeric INR amounts and displayed using Indian currency formatting (`en-IN`, `INR`) in the web app. The Chrome extension labels its price field **Price (INR)**. Demo seed prices are set to realistic sample amounts:

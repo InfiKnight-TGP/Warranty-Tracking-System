@@ -1,11 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <defs>
-    <linearGradient id="brand" x1="4" y1="4" x2="43" y2="44" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14b8a6"/>
-      <stop offset="1" stop-color="#6366f1"/>
-    </linearGradient>
-  </defs>
-  <rect width="48" height="48" rx="14" fill="#f4f7fb"/>
-  <path d="M24 5 41 11v11c0 11-7 17-17 21C14 39 7 33 7 22V11L24 5Z" fill="url(#brand)"/>
-  <path d="m16 23 5 5 11-12" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Warrify</title>
+  <rect width="48" height="48" rx="12" fill="#0d1117"/>
+  <text x="24" y="35" fill="#f3f4f6" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="700" text-anchor="middle">W</text>
 </svg>

@@ -2,8 +2,6 @@
 
 **Warrify** is a Java 17 / Spring Boot application for storing purchase bills, tracking warranty expiry, sending reminders, and managing service claims. It ships with a static web UI and a Chrome extension that works as a second client of the same API.
 
-Built as a course project for **Server-Side Programming (Spring Framework)** at VIT.
-
 ## Features
 
 - **Purchase vault**: add, edit, search and filter purchases; upload and download bills (PDF, JPG, PNG).
@@ -93,7 +91,7 @@ Warranty Tracker/
 
 ### Resetting an older database
 
-The ORM changes add required `updated_at` columns and a notification discriminator. If you have a database from an older version, reset it (this deletes all data in `warranty_vault`):
+Newer versions add required `updated_at` columns and a notification discriminator. If you have a database from an older version, reset it (this deletes all data in `warranty_vault`):
 
 ```powershell
 mysql -u root -proot -e "DROP DATABASE IF EXISTS warranty_vault; CREATE DATABASE warranty_vault;"
@@ -177,7 +175,7 @@ Gaming Monitor,LG,Electronics,MON-101,TechStore,2025-05-10,18999,24,support@lg.c
 
 Each row is validated. The response shows how many rows were imported and skipped. Admins can export all purchases as CSV from **Batch Jobs**, where the executions table shows each job's status and read, write and skip counts.
 
-## Validation and ORM notes
+## Implementation notes
 
 - Purchase creation and update use separate validation groups.
 - Custom constraints require a purchase date from 2000-01-01 to today, and a warranty of 1–120 months.
@@ -252,3 +250,7 @@ If Git reports "dubious ownership" for the folder:
 ```powershell
 git config --global --add safe.directory 'E:/Warranty Tracker'
 ```
+
+## Contributing
+
+Issues and pull requests are welcome. For larger changes, please open an issue first to discuss what you'd like to change.

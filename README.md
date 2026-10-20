@@ -1,88 +1,119 @@
-# Warrify
+# <img src="src/main/resources/static/images/favicon.svg" alt="Warrify logo" width="36"> Warrify
 
-A Java 17 and Spring Boot application for tracking purchases, bills, warranties, reminders, and service claims. The web UI is static HTML, CSS, and vanilla JavaScript; REST APIs use JSON, with a SOAP warranty lookup for integration practice.
+**Warrify** is a Java 17 / Spring Boot application for storing purchase bills, tracking warranty expiry, sending reminders, and managing service claims. It ships with a static web UI and a Chrome extension that works as a second client of the same API.
 
-The product name is **Warrify**. The web app logo is in `src/main/resources/static/images/warrify-logo.svg`; its favicon is a white **W** on a near-black rounded tile, matching the supplied Warrify wordmark. The Chrome extension uses the same favicon in `chrome-extension/icons/favicon.svg` and matching 16, 48, and 128 pixel toolbar icons. Regenerate the extension PNGs on Windows with:
+The web and extension favicons use a white **W** on a near-black rounded tile, matching the Warrify wordmark. Regenerate the extension's 16, 48, and 128 pixel PNG icons on Windows with:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\chrome-extension\icons\generate-icons.ps1
 ```
 
-## Screenshots
+## Features
 
-Screenshots of the main web pages and Chrome extension are in [`docs/screenshots/`](docs/screenshots/):
+- **Purchase vault**: add, edit, search and filter purchases; upload and download bills (PDF, JPG, PNG).
+- **Expiry reminders**: a scheduled Spring Batch job sends 30-day and 7-day reminders through a JMS queue. Each reminder is sent only once.
+- **Claim workflow**: users raise claims, admins assign a service centre, and the service centre moves each claim through `RAISED → RECEIVED → IN_REPAIR → REPAIRED → RETURNED` (or `REJECTED`), with full history.
+- **Notifications**: in-app reminders and claim updates, with an unread count.
+- **Roles**: User, Admin and Service centre, enforced with Spring Security.
+- **SOAP lookup**: get the warranty status for a serial number through a published WSDL.
+- **Batch jobs**: CSV import (with row validation and skipping), CSV export, and job history for admins.
+- **Chrome extension**: add purchases from any web page, attach a page screenshot as the bill, and get badge counts and desktop alerts.
 
-| Dashboard | Purchases |
+## Tech stack
+
+| Layer | Technology |
 | --- | --- |
-| ![Warrify dashboard](docs/screenshots/dashboard.png) | ![Warrify purchases](docs/screenshots/purchases.png) |
+| Language / build | Java 17, Maven (wrapper included) |
+| Framework | Spring Boot 3, Spring MVC (REST, JSON) |
+| Web services | Spring Web Services (SOAP, WSDL, JAXB) |
+| Security | Spring Security (session login for the web app, bearer tokens for the extension), BCrypt |
+| Persistence | Spring Data JPA, Hibernate, MySQL 8 |
+| Messaging | JMS with embedded ActiveMQ Artemis |
+| Batch / scheduling | Spring Batch, `@Scheduled` |
+| Front end | HTML, CSS, vanilla JavaScript, Bootstrap 5 |
+| Extension | Chrome Extension, Manifest V3 |
+| Testing | JUnit 5, Mockito, H2 (test scope only) |
 
-| Claims | Admin |
-| --- | --- |
-| ![Warrify claims](docs/screenshots/claims.png) | ![Warrify admin](docs/screenshots/admin.png) |
+## Architecture
 
-Chrome extension popup:
+```
+Web app (HTML/JS)  ──session──┐
+                              ├──► Spring Boot ──► Controllers / SOAP endpoint
+Chrome extension  ──token─────┘                    ├─ Services ── Repositories (JPA) ──► MySQL
+                                                   ├─ Spring Security
+                                                   ├─ Spring Batch + scheduler
+                                                   └─ JMS producers/listeners ──► Artemis queues
+```
 
-![Warrify Chrome extension](docs/screenshots/extension.png)
+## Project structure
 
-## Demo prices and currency
-
-Prices are entered and stored as numeric INR amounts and displayed using Indian currency formatting (`en-IN`, `INR`) in the web app. The Chrome extension labels its price field **Price (INR)**. Demo seed prices are set to realistic sample amounts:
-
-| Demo product | Sample price |
-| --- | ---: |
-| Whirlpool refrigerator | ₹34,990 |
-| Lenovo laptop | ₹64,990 |
-| LG washing machine | ₹28,990 |
-| Samsung smartphone | ₹24,999 |
-| Sony television | ₹54,990 |
-
-On startup, the seeder refreshes these five prices for matching demo serial numbers owned by `user@vault.com`, including in an existing database. It does not convert or change other user purchases. These amounts are examples; prices entered through the app are kept as entered.
+```
+Warranty Tracker/
+├── src/main/java/com/vault/
+│   ├── config/        Security, SOAP, JMS, batch, data seeder
+│   ├── controller/    REST controllers
+│   ├── dto/           Request/response objects
+│   ├── entity/        JPA entities
+│   ├── repository/    Spring Data repositories, specifications, projections
+│   ├── service/       Business logic
+│   ├── soap/          SOAP endpoint, client, JAXB classes
+│   ├── messaging/     JMS producers and listeners
+│   ├── scheduler/     Reminder scheduler
+│   └── exception/     Custom exceptions and global handler
+├── src/main/resources/
+│   ├── static/        Web UI (HTML, CSS, JS, images)
+│   ├── xsd/           SOAP schema
+│   └── application.properties
+├── src/test/java/     Unit and integration tests
+├── chrome-extension/  Manifest V3 extension
+└── pom.xml
+```
 
 ## Requirements
 
 - JDK 17
 - MySQL 8
 - Internet access for the first Maven wrapper build
-- No global Maven installation is required
+- No global Maven installation is needed
 
-## MySQL setup
+## Quick start
 
-Start MySQL 8. The default connection in `src/main/resources/application.properties` uses database `warranty_vault`, username `root`, and password `root`. Change these settings for your local installation. `createDatabaseIfNotExist=true` creates the database when needed, and Hibernate updates the schema.
+1. **Start MySQL 8.** The default connection in `src/main/resources/application.properties` uses database `warranty_vault`, username `root` and password `root`. Change these to match your installation. `createDatabaseIfNotExist=true` creates the database, and Hibernate updates the schema.
 
-The ORM exercise adds required `updated_at` columns and a notification discriminator. For this seed-data project, reset an older schema from PowerShell with the MySQL client installed and on `PATH`:
+2. **Run the app.** In Windows PowerShell:
+
+   ```powershell
+   $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
+   .\mvnw.cmd spring-boot:run
+   ```
+
+   On macOS or Linux:
+
+   ```sh
+   ./mvnw spring-boot:run
+   ```
+
+3. **Open** <http://localhost:8080> and sign in with a demo account. The embedded Artemis broker starts with the app, so no external broker is needed.
+
+### Resetting an older database
+
+Newer versions add required `updated_at` columns and a notification discriminator. If you have a database from an older version, reset it (this deletes all data in `warranty_vault`):
 
 ```powershell
 mysql -u root -proot -e "DROP DATABASE IF EXISTS warranty_vault; CREATE DATABASE warranty_vault;"
 ```
 
-This deletes all data in `warranty_vault`. On the next app startup, `DataSeeder` recreates the three demo accounts and five purchases because the users table is empty.
-
-## Import into Eclipse
-
-1. Choose **File > Import > Maven > Existing Maven Projects**.
-2. Select the project directory containing `pom.xml` and finish the import.
-3. Set the project JRE to JDK 17 if Eclipse does not choose it automatically.
-
-## Run the application
-
-In Windows PowerShell:
+If `mysql` isn't on your `PATH`, use the full path:
 
 ```powershell
-$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
-.\mvnw.cmd spring-boot:run
+& "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" -u root -proot -e "DROP DATABASE IF EXISTS warranty_vault; CREATE DATABASE warranty_vault;"
 ```
 
-On macOS or Linux with JDK 17:
-
-```sh
-./mvnw spring-boot:run
-```
-
-Open <http://localhost:8080>. The app uses an embedded Artemis broker; no external broker is required.
+On the next startup, `DataSeeder` recreates the demo accounts and purchases.
 
 ## Demo accounts
 
-Accounts and sample purchases are created only when the users table is empty:
+Created only when the users table is empty:
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -90,11 +121,40 @@ Accounts and sample purchases are created only when the users table is empty:
 | Service centre | `service@vault.com` | `service123` |
 | User | `user@vault.com` | `user123` |
 
-Sample serial numbers include `WR-1001` (Refrigerator/Whirlpool), `LG-3003` (expiring in about 20 days), and `SM-4004` (expiring in about 5 days).
+### Demo purchases
+
+Prices are stored as INR amounts and shown with Indian formatting (`en-IN`). On startup, the seeder refreshes these five prices for matching serial numbers owned by `user@vault.com`. It does not change any other purchases.
+
+| Product | Serial number | Sample price | Notes |
+| --- | --- | ---: | --- |
+| Whirlpool refrigerator | `WR-1001` | ₹34,990 | Active; used in the SOAP example |
+| Lenovo laptop | | ₹64,990 | |
+| LG washing machine | `LG-3003` | ₹28,990 | Expires in about 20 days |
+| Samsung smartphone | `SM-4004` | ₹24,999 | Expires in about 5 days |
+| Sony television | | ₹54,990 | |
+
+## Demo walkthrough
+
+1. Sign in as **user**, add a purchase, upload a bill and raise a claim.
+2. Sign in as **admin**, assign the claim to the service centre, and run the reminder job from **Batch Jobs**.
+3. Sign in as **service centre** and move the claim through each status to `RETURNED`.
+4. Sign in as **user** again and check the claim timeline and **Notifications**.
+
+## Reminders
+
+The reminder job runs daily at 09:00 (`vault.scheduler.cron=0 0 9 * * *`). For a demo, either click **Run reminder job** on the admin page, or set:
+
+```properties
+vault.scheduler.cron=0 * * * * *
+```
+
+Then restart the app so the job runs every minute. Restore the daily schedule afterwards. Per-purchase 30-day and 7-day flags prevent duplicate reminders.
+
+The job reads candidates with a cursor reader, so updating reminder flags doesn't change the rows being iterated. Messages go through the configured JMS template, so `ReminderListener` receives them with the same message conversion.
 
 ## SOAP warranty lookup
 
-The WSDL is available at <http://localhost:8080/ws/warranty.wsdl>. The operation accepts a seeded product serial number and returns the product, brand, expiry date, remaining days, and status. Example in Windows PowerShell:
+The WSDL is at <http://localhost:8080/ws/warranty.wsdl>. The operation takes a serial number and returns the product, brand, expiry date, days remaining and status. Example in PowerShell:
 
 ```powershell
 $soap = @'
@@ -110,44 +170,45 @@ Invoke-WebRequest -Uri http://localhost:8080/ws -Method Post `
   -ContentType 'text/xml; charset=utf-8' -Body $soap
 ```
 
-## CSV import and admin batch jobs
+## CSV import and export
 
-The Purchases page accepts a CSV with this header:
+The Purchases page accepts a CSV with this header. Dates use `yyyy-MM-dd`:
 
 ```text
 productName,brand,category,serialNumber,storeName,purchaseDate,price,warrantyMonths,supportContact
+Gaming Monitor,LG,Electronics,MON-101,TechStore,2025-05-10,18999,24,support@lg.com
 ```
 
-Dates use ISO format (`yyyy-MM-dd`). Each imported row is validated; the response shows how many rows were imported and skipped. Admins can run the reminder job or export all purchases as CSV from the Batch Jobs section of the admin page. The executions table shows job status and read, write, and skip counts.
+Each row is validated. The response shows how many rows were imported and skipped. Admins can export all purchases as CSV from **Batch Jobs**, where the executions table shows each job's status and read, write and skip counts.
 
-The batch reminder job uses a cursor reader so updates to reminder flags do not alter the rows being iterated. It sends messages through the configured JMS template, preserving the same message conversion used by `ReminderListener`.
+## Implementation notes
 
-## Trigger reminders quickly
+- Purchase creation and update use separate validation groups.
+- Custom constraints require a purchase date from 2000-01-01 to today, and a warranty of 1–120 months.
+- Validation errors include a `fields` object so the UI can show messages under each input.
+- Entities inherit `createdAt` and `updatedAt` from `BaseEntity`.
+- Notifications use one table with a discriminator for expiry and claim types.
+- Purchase search uses JPA specifications. Summary and admin views use projections and aggregate queries, with in-memory caching for dashboard counts.
 
-The normal schedule runs daily at 09:00 using `vault.scheduler.cron`. For a demo, either click **Run reminder job** on the admin page or temporarily set:
+## Chrome extension
 
-```properties
-vault.scheduler.cron=0 * * * * *
-```
+The Manifest V3 extension is a second client for the same API. It only works while the back end is running (default `http://localhost:8080`).
 
-Restart the app to run the scheduled job once a minute. Check Notifications using the demo user. Restore `0 0 9 * * *` afterwards. The per-purchase 30-day and 7-day flags prevent duplicate reminders.
-
-## Validation and ORM notes
-
-Purchase creation and update use separate validation groups. The custom date constraint requires a purchase date from 2000-01-01 through today; the custom warranty-period constraint limits the warranty to 1–120 months. Validation responses include a `fields` object for the UI.
-
-Entities inherit `createdAt` and `updatedAt` timestamps from `BaseEntity`. Notifications use a single table with a discriminator for expiry and claim notifications. Purchase search uses JPA specifications; summary and admin views use projections and aggregate queries, with in-memory caching for dashboard counts.
-
-## Chrome Extension
-
-The optional Manifest V3 extension is a second client for the existing API. It only works while the Warrify back end is running on `localhost` (default: `http://localhost:8080`). To install it in Chrome:
+**Install:**
 
 1. Open `chrome://extensions` and turn on **Developer mode**.
-2. Select **Load unpacked** and choose this project's `chrome-extension/` folder.
-3. Open the Warrify extension, sign in with a USER account, and use **Server settings** if the back end uses a different local address.
-4. Try **Add purchase** (including the optional visible-page screenshot), **Expiring soon**, and **Notifications** with **Mark read**. The extension checks immediately on sign-in, when its popup opens, at browser startup, and every minute while Chrome is running; it updates its badges and shows desktop alerts for newly detected unread notifications. You can also switch themes, autofill demo credentials, auto-detect product and store details from a page, mark all notifications read, and test the server connection in settings.
+2. Click **Load unpacked** and select the `chrome-extension/` folder.
+3. Open Warrify from the toolbar and sign in with a **User** account. Use **Server settings** if the back end runs on a different address.
 
-The extension authenticates using a bearer token created by `POST /api/auth/token`. The server stores only a SHA-256 hash of each token. Logging out revokes the current token. Existing session-based web login continues to work as before. The extension calls the existing notification read route, `PUT /api/notifications/{id}/read`.
+**Features:**
+
+- **Add purchase**, with auto-detected product and store details and an optional screenshot of the visible page as the bill. The price field is in INR.
+- **Expiring soon** list.
+- **Notifications** with **Mark read** and **Mark all read**.
+- Theme switching, demo-credential autofill and a server connection test.
+- Checks for new notifications on sign-in, when the popup opens, at browser startup and every minute while Chrome runs. It updates the badge and shows desktop alerts for new unread notifications.
+
+**Authentication:** the extension gets a bearer token from `POST /api/auth/token`. The server stores only a SHA-256 hash of each token, and logging out revokes it. Session login for the web app works as before.
 
 ## Build and tests
 
@@ -155,23 +216,47 @@ The extension authenticates using a bearer token created by `POST /api/auth/toke
 .\mvnw.cmd clean package
 ```
 
-Tests cover warranty expiry calculation, claim status transitions, scheduler windows, custom purchase validation, search specifications, batch reminder selection and CSV import counts, SOAP endpoint/WSDL behavior, and Spring context loading. H2 is test scope only; the app uses MySQL.
+Tests cover warranty expiry calculation, claim status transitions, scheduler windows, custom validation, search specifications, batch reminder selection and CSV import counts, SOAP endpoint and WSDL behaviour, and Spring context loading. H2 is used only for tests; the app itself uses MySQL.
+
+## Import into Eclipse
+
+1. Choose **File → Import → Maven → Existing Maven Projects**.
+2. Select the folder containing `pom.xml` and click **Finish**.
+3. Set the project JRE to JDK 17 if Eclipse doesn't pick it automatically.
+4. Run `WarrantyVaultApplication` as a Java Application (or Spring Boot App with Spring Tools).
+
+## Screenshots
+
+Screenshots of the current web app and Chrome extension are included in `docs/screenshots/`:
+
+| Dashboard | Purchases | Claim timeline |
+| --- | --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Purchases](docs/screenshots/purchases.png) | ![Claim timeline](docs/screenshots/claims.png) |
+
+| Admin batch jobs | Extension popup |
+| --- | --- |
+| ![Admin](docs/screenshots/admin.png) | ![Extension](docs/screenshots/extension.png) |
 
 ## Git setup
 
-Generated build output, uploaded bills, local Maven caches, exported CSV files, environment files, and runtime logs are excluded by `.gitignore`. The Maven Wrapper files and the Warrify brand assets are part of the project and should be committed.
+`.gitignore` excludes build output, uploaded bills, local Maven caches, exported CSV files, environment files and logs. Commit the Maven wrapper files and the Warrify brand assets.
 
-To connect this local repository to a remote, replace the URL with your Git host's repository URL:
+To push to a new remote repository:
 
 ```powershell
 git remote add origin <repository-url>
 git add .
 git commit -m "Prepare Warrify project"
+git branch -M main
 git push -u origin main
 ```
 
-If Git reports that the workspace has “dubious ownership,” add this folder to Git's safe-directory list from your Windows account:
+If Git reports "dubious ownership" for the folder:
 
 ```powershell
 git config --global --add safe.directory 'E:/Warranty Tracker'
 ```
+
+## Contributing
+
+Issues and pull requests are welcome. For larger changes, please open an issue first to discuss what you'd like to change.
